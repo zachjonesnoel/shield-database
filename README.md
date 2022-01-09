@@ -16,3 +16,10 @@ From the command line, use AWS SAM to deploy the AWS resources for the pattern a
 sam build
 sam deploy --guided
 ```
+
+## Recouces 
++ [Blog post](https://dev.to/zachjonesnoel/aws-sam-app-with-mongodb-atlas-data-apis-18nl)
++ [MongoDB Atlas Data API](https://docs.atlas.mongodb.com/api/data-api/)
++ [MongoDB Atlas Search](https://docs.atlas.mongodb.com/atlas-search/)
++ [MongoDB Atlas Charts](https://docs.mongodb.com/charts/)
++ [AWS SAM application](https://aws.amazon.com/serverless/sam/)

@@ -9,18 +9,12 @@ exports.getAllItemsHandler = (event, context, callback) => {
     let collection = ""
     switch (event.pathParameters.type) {
         case "agents": collection = "shield_agents"; break;
-        case "locations": collection = "collection=shield_agents;break;"; break;
+        case "locations": collection = "shield_locations"; break;
     }
     let data = JSON.stringify({
         "collection": collection,
         "database": "shield_database",
-        "dataSource": "Cluster0",
-        "projection": {
-            "_id": 1,
-            "name": 1,
-            "designation": 1,
-            "security_level": 1
-        }
+        "dataSource": "Cluster0"
     })
     let config = {
         method: 'post',
