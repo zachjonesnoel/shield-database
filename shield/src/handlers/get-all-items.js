@@ -1,58 +1,51 @@
+var axios = require('axios');
 
-const http = require('http'); 
-
-const defaultOptions = {
-    host: 'https://data.mongodb-api.com/app/data-whpzf/endpoint/data/beta/action',
-    headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Request-Headers': '*',
-        'api-key': 'mxzhlSO4Z3HgTIWTXISFi6wzHg1zA7Roqur71KuIwXrn0eL3mov4VjgEQcCjCWUg'
-    },
-}
-
-const post = (path, payload) => new Promise((resolve, reject) => {
-    const options = { ...defaultOptions, path, method: 'POST' };
-    const req = http.request(options, res => {
-        let buffer = "";
-        res.on('data', chunk => buffer += chunk)
-        res.on('end', () => resolve(JSON.parse(buffer)))
-    });
-    req.on('error', e => reject(e.message));
-    req.write(JSON.stringify(payload));
-    req.end();
-})
-var data = JSON.stringify({
-    "collection": "shield_agents",
-    "database": "shield_database",
-    "dataSource": "Cluster0",
-    "projection": {
-        "_id": 1
-    }
-});
-                  
-
-exports.getAllItemsHandler = async (event) => {
+exports.getAllItemsHandler = (event, context, callback) => {
     if (event.httpMethod !== 'GET') {
         throw new Error(`getAllItems only accept GET method, you tried: ${event.httpMethod}`);
     }
     // All log statements are written to CloudWatch
     console.info('received:', event);
-
-    let items = await post("/findOne", {
-        "collection": "shield_agents",
+    let collection = ""
+    switch (event.pathParameters.type) {
+        case "agents": collection = "shield_agents"; break;
+        case "locations": collection = "collection=shield_agents;break;"; break;
+    }
+    let data = JSON.stringify({
+        "collection": collection,
         "database": "shield_database",
         "dataSource": "Cluster0",
         "projection": {
-            "_id": 1
+            "_id": 1,
+            "name": 1,
+            "designation": 1,
+            "security_level": 1
         }
-    });
-   
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify(items)
+    })
+    let config = {
+        method: 'post',
+        url: process.env.MONGODB_URL+'/findOne',
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Request-Headers': '*',
+            'api-key': process.env.MONGODB_API_KEY
+        },
+        data: data
     };
 
-    // All log statements are written to CloudWatch
-    console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
-    return response;
+    axios(config).then(data => {
+        console.info(data);
+        // All log statements are written to CloudWatch
+        const response = {
+            "statusCode": 200,
+            "headers": {
+                "X-Requested-With": '*',
+                "Access-Control-Allow-Headers": 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-requested-with',
+                "Access-Control-Allow-Origin": '*',
+                "Access-Control-Allow-Methods": 'POST,GET,OPTIONS'
+            },
+            "body": JSON.stringify(data.data)
+        };
+        callback(null, response);
+    });
 }
